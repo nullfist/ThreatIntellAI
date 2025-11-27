@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze Logs - ThreatIntellAI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-file-alt"></i>
+                    Analyze Security Logs
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">
+                    Upload system logs to detect security patterns like failed logins, brute force attacks, 
+                    and suspicious activity. Our AI will analyze and provide school-friendly explanations.
+                </p>
+
+                <form id="uploadLogsForm" onsubmit="uploadLogs(event)">
+                    <div class="mb-3">
+                        <label for="log_type" class="form-label">Log Type</label>
+                        <select class="form-select" id="log_type" name="log_type" required>
+                            <option value="">Select log type...</option>
+                            {% for type in log_types %}
+                            <option value="{{ type }}">{{ type|upper }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">
+                            Choose the type of log file you're uploading for better analysis.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="log_file" class="form-label">Log File</label>
+                        <input type="file" class="form-control" id="log_file" name="file" 
+                               accept=".log,.txt,.csv" required>
+                        <div class="form-text">
+                            Supported formats: .log, .txt, .csv (Max 10MB)
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Supported Log Types:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>Auth Log</strong> - Linux system authentication logs</li>
+                            <li><strong>IIS</strong> - Microsoft web server logs</li>
+                            <li><strong>Firewall</strong> - Network firewall logs</li>
+                            <li><strong>Windows Event</strong> - Windows system event logs</li>
+                            <li><strong>Apache</strong> - Apache web server logs</li>
+                        </ul>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg w-100" id="uploadButton">
+                        <i class="fas fa-upload"></i>
+                        Analyze Log File
+                    </button>
+                </form>
+
+                <div id="result" class="mt-4" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Sample Log Content -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb"></i>
+                    Sample Log Content for Testing
+                </h6>
+            </div>
+            <div class="card-body">
+                <pre class="bg-light p-3 rounded small"><code>Jan 15 10:30:00 server sshd[1234]: Failed password for root from 192.168.1.100 port 22 ssh2
+Jan 15 10:30:01 server sshd[1235]: Failed password for root from 192.168.1.100 port 22 ssh2
+Jan 15 10:30:02 server sshd[1236]: Failed password for admin from 192.168.1.100 port 22 ssh2
+Jan 15 10:30:03 server sshd[1237]: Invalid user hacker from 192.168.1.100
+Jan 15 10:30:04 server sshd[1238]: Accepted password for teacher from 192.168.1.50 port 22 ssh2</code></pre>
+                <p class="text-muted small">Copy this content to a .log file for testing.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function uploadLogs(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const button = document.getElementById('uploadButton');
+    const resultDiv = document.getElementById('result');
+    
+    // Show loading state
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+    button.disabled = true;
+    resultDiv.style.display = 'none';
+    
+    try {
+        const formData = new FormData(form);
+        const response = await fetch('/api/upload-logs', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Store result and redirect
+            sessionStorage.setItem('lastScanResult', JSON.stringify(data.result));
+            window.location.href = '/results?type=log';
+        } else {
+            showError(data.error || 'Log analysis failed. Please try again.');
+        }
+    } catch (error) {
+        showError('Network error. Please check your connection.');
+    } finally {
+        // Reset button
+        button.innerHTML = '<i class="fas fa-upload"></i> Analyze Log File';
+        button.disabled = false;
+    }
+}
+
+function showError(message) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = `
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Error:</strong> ${message}
+        </div>
+    `;
+    resultDiv.style.display = 'block';
+}
+</script>
+{% endblock %}

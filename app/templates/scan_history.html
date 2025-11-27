@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Scan History - ThreatIntellAI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-history"></i>
+                Scan History
+            </h2>
+            <a href="/" class="btn btn-outline-primary">
+                <i class="fas fa-home"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list"></i>
+                    Recent Threat Scans
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="historyContainer">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading scan history...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('History page loaded');
+    loadScanHistory();
+});
+
+function loadScanHistory() {
+    console.log('Loading scan history...');
+    
+    fetch('/api/scan-history')
+        .then(response => response.json())
+        .then(data => {
+            console.log('History data:', data);
+            const container = document.getElementById('historyContainer');
+            
+            if (data.success && data.scans && data.scans.length > 0) {
+                displayHistory(data.scans);
+            } else {
+                showNoHistory();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading history:', error);
+            showHistoryError();
+        });
+}
+
+function displayHistory(scans) {
+    const container = document.getElementById('historyContainer');
+    
+    let html = `
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Risk Level</th>
+                    <th>Threats</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    scans.forEach(scan => {
+        const riskClass = scan.risk_level === 'malicious' ? 'danger' : 
+                        scan.risk_level === 'suspicious' ? 'warning' : 'success';
+        const riskIcon = scan.risk_level === 'malicious' ? 'fa-exclamation-triangle' :
+                       scan.risk_level === 'suspicious' ? 'fa-exclamation-circle' : 'fa-check-circle';
+        
+        html += `
+        <tr>
+            <td><span class="badge bg-secondary">${scan.ioc_type.toUpperCase()}</span></td>
+            <td><code title="${scan.ioc}">${scan.ioc.length > 30 ? scan.ioc.substring(0, 30) + '...' : scan.ioc}</code></td>
+            <td>
+                <span class="badge bg-${riskClass}">
+                    <i class="fas ${riskIcon}"></i> ${scan.risk_level}
+                </span>
+            </td>
+            <td>${scan.threat_labels.join(', ') || 'None'}</td>
+            <td>${new Date(scan.timestamp).toLocaleDateString()}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewScanDetails('${scan.ioc}')">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            </td>
+        </tr>
+        `;
+    });
+    
+    html += `
+            </tbody>
+        </table>
+        <p class="text-muted">Showing ${scans.length} most recent scans</p>
+    </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+function showNoHistory() {
+    const container = document.getElementById('historyContainer');
+    container.innerHTML = `
+    <div class="text-center py-4">
+        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+        <h5>No Scan History Found</h5>
+        <p class="text-muted">Start by scanning your first threat indicator!</p>
+        <a href="/upload/ioc" class="btn btn-primary">Scan a Threat</a>
+    </div>
+    `;
+}
+
+function showHistoryError() {
+    const container = document.getElementById('historyContainer');
+    container.innerHTML = `
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        Error loading scan history. Please try again.
+    </div>
+    `;
+}
+
+function viewScanDetails(ioc) {
+    // For now, just show an alert. In a real app, you'd fetch detailed results.
+    alert(`Details for: ${ioc}\n\nThis would show detailed scan results in a real implementation.`);
+}
+</script>
+{% endblock %}

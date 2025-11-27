@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Threat - ThreatIntellAI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-search"></i>
+                    Scan Threat Indicator
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">
+                    Check IP addresses, URLs, domains, or file hashes for security risks. 
+                    Our AI will analyze and provide school-friendly explanations.
+                </p>
+
+                <form id="scanForm" onsubmit="submitScan(event)">
+                    <div class="mb-3">
+                        <label for="ioc_type" class="form-label">Threat Type</label>
+                        <select class="form-select" id="ioc_type" name="ioc_type" required>
+                            <option value="">Select threat type...</option>
+                            {% for type in ioc_types %}
+                            <option value="{{ type }}">{{ type|upper }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ioc_value" class="form-label">Threat Value</label>
+                        <input type="text" class="form-control" id="ioc_value" name="ioc_value" 
+                               placeholder="Enter IP, URL, domain, or file hash..." required>
+                        <div class="form-text">
+                            Examples: 
+                            <span class="text-muted">192.168.1.100</span>, 
+                            <span class="text-muted">http://suspicious-site.com</span>, 
+                            <span class="text-muted">malicious-domain.net</span>, 
+                            <span class="text-muted">d41d8cd98f00b204e9800998ecf8427e</span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>School-Safe Analysis:</strong> All results are explained in simple language 
+                        with actionable recommendations for school staff.
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100" id="scanButton">
+                        <i class="fas fa-search"></i>
+                        Scan for Threats
+                    </button>
+                </form>
+
+                <div id="result" class="mt-4" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Quick Examples -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb"></i>
+                    Quick Test Examples
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary w-100" onclick="fillExample('ip', '192.168.1.100')">
+                            Test IP Address
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary w-100" onclick="fillExample('url', 'http://malicious-site.com')">
+                            Test URL
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary w-100" onclick="fillExample('domain', 'suspicious-domain.net')">
+                            Test Domain
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-primary w-100" onclick="fillExample('hash', 'd41d8cd98f00b204e9800998ecf8427e')">
+                            Test File Hash
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function fillExample(type, value) {
+    document.getElementById('ioc_type').value = type;
+    document.getElementById('ioc_value').value = value;
+}
+
+async function submitScan(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const button = document.getElementById('scanButton');
+    const resultDiv = document.getElementById('result');
+    
+    // Show loading state
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+    button.disabled = true;
+    resultDiv.style.display = 'none';
+    
+    try {
+        const formData = new FormData(form);
+        
+        console.log('Submitting scan request...');
+        const response = await fetch('/api/scan-ioc', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        console.log('Scan response:', data);
+        
+        if (data.success) {
+            // Store result in session storage
+            sessionStorage.setItem('lastScanResult', JSON.stringify(data.result));
+            console.log('Result stored, redirecting to results page...');
+            
+            // Redirect to results page
+            window.location.href = '/results';
+        } else {
+            showError(data.error || 'Scan failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Scan error:', error);
+        showError('Network error. Please check your connection.');
+    } finally {
+        // Reset button
+        button.innerHTML = '<i class="fas fa-search"></i> Scan for Threats';
+        button.disabled = false;
+    }
+}
+
+function showError(message) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = `
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Error:</strong> ${message}
+        </div>
+    `;
+    resultDiv.style.display = 'block';
+}
+
+// Test API connection on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('IOC Upload page loaded');
+    
+    // Test if API is reachable
+    fetch('/api/test')
+        .then(response => response.json())
+        .then(data => {
+            console.log('API test result:', data);
+        })
+        .catch(error => {
+            console.error('API test failed:', error);
+        });
+});
+</script>
+{% endblock %}

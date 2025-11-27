@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results - ThreatIntellAI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-chart-bar"></i>
+                Threat Analysis Results
+            </h2>
+            <a href="/" class="btn btn-outline-primary">
+                <i class="fas fa-home"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <div id="resultsContainer">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading analysis results...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Results page loaded');
+    displayStoredResults();
+});
+
+function displayStoredResults() {
+    const resultsContainer = document.getElementById('resultsContainer');
+    const resultJson = sessionStorage.getItem('lastScanResult');
+    
+    console.log('Stored result:', resultJson);
+    
+    if (resultJson) {
+        try {
+            const result = JSON.parse(resultJson);
+            displayResults(result);
+        } catch (error) {
+            console.error('Error parsing result:', error);
+            showNoResults();
+        }
+    } else {
+        showNoResults();
+    }
+}
+
+function displayResults(result) {
+    console.log('Displaying results:', result);
+    
+    const riskClass = result.risk_level === 'malicious' ? 'danger' : 
+                     result.risk_level === 'suspicious' ? 'warning' : 'success';
+    
+    const riskIcon = result.risk_level === 'malicious' ? 'fa-exclamation-triangle' :
+                    result.risk_level === 'suspicious' ? 'fa-exclamation-circle' : 'fa-check-circle';
+
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    resultsContainer.innerHTML = `
+        <!-- Summary Card -->
+        <div class="card mb-4">
+            <div class="card-header bg-${riskClass} text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas ${riskIcon}"></i>
+                    Threat Summary - ${result.risk_level.toUpperCase()}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Threat Indicator</h6>
+                        <p class="fs-5"><strong>${result.ioc_type.toUpperCase()}:</strong> ${result.ioc}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Analysis Details</h6>
+                        <p><strong>Confidence:</strong> ${(result.confidence_score * 100).toFixed(0)}%</p>
+                        <p><strong>Threat Types:</strong> ${result.threat_labels.join(', ') || 'None detected'}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Explanation -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-robot"></i>
+                    AI Security Explanation
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="ai-explanation">
+                    ${formatExplanation(result.ai_explanation)}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommended Actions -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list-check"></i>
+                    Recommended Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    ${result.recommended_actions.map((action, index) => `
+                        <div class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            ${action}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Details -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs"></i>
+                    Technical Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Sources Checked</h6>
+                        <ul>
+                            ${result.sources_checked.map(source => `<li>${source}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Analysis Information</h6>
+                        <p><strong>Scan Time:</strong> ${new Date(result.timestamp).toLocaleString()}</p>
+                        <p><strong>Threat Count:</strong> ${result.technical_details.threat_count || 'N/A'}</p>
+                        <p><strong>Reputation:</strong> ${result.technical_details.reputation || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="btn-group" role="group">
+                    <a href="/upload/ioc" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Scan Another Threat
+                    </a>
+                    <button onclick="generateReport()" class="btn btn-success">
+                        <i class="fas fa-file-pdf"></i> Generate PDF Report
+                    </button>
+                    <a href="/history" class="btn btn-outline-secondary">
+                        <i class="fas fa-history"></i> View History
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function formatExplanation(explanation) {
+    if (!explanation) return '<p>No explanation available.</p>';
+    
+    return explanation.split('\n')
+        .map(line => line.trim())
+        .filter(line => line)
+        .map(line => {
+            if (line.startsWith('RISK LEVEL:') || line.startsWith('THREAT TYPES:')) {
+                return `<p><strong>${line}</strong></p>`;
+            } else if (line.includes(':')) {
+                const parts = line.split(':');
+                return `<p><strong>${parts[0]}:</strong> ${parts.slice(1).join(':')}</p>`;
+            } else {
+                return `<p>${line}</p>`;
+            }
+        })
+        .join('');
+}
+
+function showNoResults() {
+    const resultsContainer = document.getElementById('resultsContainer');
+    resultsContainer.innerHTML = `
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            No analysis results found. Please scan a threat first.
+        </div>
+        <div class="text-center mt-3">
+            <a href="/upload/ioc" class="btn btn-primary">Scan a Threat</a>
+        </div>
+    `;
+}
+
+function generateReport() {
+    const result = JSON.parse(sessionStorage.getItem('lastScanResult'));
+    
+    if (!result) {
+        alert('No scan results available to generate report.');
+        return;
+    }
+    
+    fetch('/api/generate-report', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'title': `Security Analysis - ${result.ioc}`,
+            'school_name': 'Your School',
+            'report_type': 'incident',
+            'format': 'pdf'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.open(data.download_url, '_blank');
+        } else {
+            alert('Error generating report: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error generating report: ' + error.message);
+    });
+}
+</script>
+
+<style>
+.ai-explanation p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+</style>
+{% endblock %}

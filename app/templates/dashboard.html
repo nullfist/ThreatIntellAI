@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ThreatIntellAI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="hero-section text-center py-5 mb-5 bg-light rounded">
+            <h1 class="display-4 text-primary">
+                <i class="fas fa-shield-alt"></i>
+                ThreatIntellAI
+            </h1>
+            <p class="lead">School-Friendly Cybersecurity Threat Detection</p>
+            <p class="text-muted">Protect your school with AI-powered security analysis</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Quick Actions -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Scan Threats</h5>
+                <p class="card-text">Check IPs, URLs, domains, or file hashes for security risks</p>
+                <a href="/upload/ioc" class="btn btn-primary">Scan Now</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-file-alt fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Analyze Logs</h5>
+                <p class="card-text">Upload system logs to detect suspicious patterns and attacks</p>
+                <a href="/upload/logs" class="btn btn-success">Upload Logs</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+                <h5 class="card-title">Generate Reports</h5>
+                <p class="card-text">Create professional security reports for school administration</p>
+                <a href="/reports" class="btn btn-danger">Create Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-history"></i>
+                    Recent Scans
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="recent-scans">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading recent activity...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load recent scans
+fetch('/api/scan-history')
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('recent-scans');
+        if (data.success && data.scans.length > 0) {
+            let html = '<div class="list-group">';
+            data.scans.slice(0, 5).forEach(scan => {
+                const riskClass = scan.risk_level === 'malicious' ? 'danger' : 
+                                scan.risk_level === 'suspicious' ? 'warning' : 'success';
+                html += `
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${scan.ioc_type.toUpperCase()}: ${scan.ioc}</h6>
+                        <span class="badge bg-${riskClass}">${scan.risk_level}</span>
+                    </div>
+                    <p class="mb-1">${scan.threat_labels.join(', ') || 'No threats detected'}</p>
+                    <small class="text-muted">Scanned on ${new Date(scan.timestamp).toLocaleString()}</small>
+                </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<p class="text-muted text-center py-4">No recent scans found. Start by scanning your first threat!</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Error loading recent scans:', error);
+        document.getElementById('recent-scans').innerHTML = '<p class="text-danger text-center py-4">Error loading recent activity</p>';
+    });
+</script>
+{% endblock %}

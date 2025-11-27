@@ -1,0 +1,80 @@
+[
+  {
+    "ioc": "192.168.1.100",
+    "ioc_type": "ip",
+    "risk_level": "malicious",
+    "threat_labels": [
+      "phishing",
+      "c2"
+    ],
+    "confidence_score": 0.76,
+    "technical_details": {
+      "ip": "192.168.1.100",
+      "reputation": -1,
+      "country": "Unknown",
+      "threat_count": 5,
+      "categories": [
+        "c2",
+        "phishing"
+      ],
+      "threat_names": [
+        "Phishing Kit"
+      ],
+      "malicious_votes": 1,
+      "harmless_votes": 12,
+      "sources": [
+        "VirusTotal",
+        "AbuseIPDB",
+        "ThreatFox"
+      ]
+    },
+    "ai_explanation": "Security Analysis for IP: 192.168.1.100\n\nRISK LEVEL: MALICIOUS\nTHREAT TYPES: phishing, c2\n\nWhat this means for your school:\nThis poses a serious security risk to school computers and data.\n\nSimple Explanation:\nThis internet address has been associated with harmful online activities.\n\nWhat to look for:\n\u2022 Login requests from unfamiliar sites\n\u2022 Urgent security warnings\n\u2022 Requests for personal information",
+    "recommended_actions": [
+      "Change any compromised passwords",
+      "Report to IT administrator",
+      "Block this immediately in school filters",
+      "Scan affected computers for malware",
+      "Enable two-factor authentication"
+    ],
+    "timestamp": "2025-11-27T23:34:36.819474",
+    "sources_checked": [
+      "VirusTotal",
+      "AbuseIPDB",
+      "ThreatFox"
+    ]
+  },
+  {
+    "ioc": "suspicious-domain.net",
+    "ioc_type": "domain",
+    "risk_level": "safe",
+    "threat_labels": [
+      "clean"
+    ],
+    "confidence_score": 0.11,
+    "technical_details": {
+      "domain": "suspicious-domain.net",
+      "reputation": 0,
+      "categories": [
+        "suspicious"
+      ],
+      "threat_names": [],
+      "malicious_votes": 7,
+      "harmless_votes": 7,
+      "sources": [
+        "VirusTotal",
+        "Google Safe Browsing"
+      ]
+    },
+    "ai_explanation": "Security Analysis for DOMAIN: suspicious-domain.net\n\nRISK LEVEL: SAFE\nTHREAT TYPES: clean\n\nWhat this means for your school:\nThis appears to be safe for normal school use.\n\nSimple Explanation:\nThis website name is registered for legitimate purposes.\n\nWhat to look for:\nGeneral security tips:\n\u2022 Keep software updated\n\u2022 Use strong passwords\n\u2022 Be careful with email attachments",
+    "recommended_actions": [
+      "No immediate action needed",
+      "Educate about general online safety",
+      "Continue normal monitoring"
+    ],
+    "timestamp": "2025-11-27T23:35:17.326562",
+    "sources_checked": [
+      "VirusTotal",
+      "Google Safe Browsing"
+    ]
+  }
+]
