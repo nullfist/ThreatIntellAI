@@ -9,7 +9,7 @@
 
 **AI-Powered Threat Detection & Reporting for Educational Environments**
 
-[Features](#-features) • [Quick Start](#-quick-start) • [API Documentation](#-api-documentation) • [Team](#-team)
+[Features](#-features) • [Quick Start](#-quick-start) • [API Documentation](#-api-documentation) • [Deployment](#-deployment)
 
 </div>
 
@@ -17,51 +17,35 @@
 
 **ThreatIntellAI** is a school-friendly cybersecurity platform that helps teachers, admin staff, and IT teams identify threats, understand risks, and respond — without needing technical knowledge.
 
-> **MVP Mission**: Detect threats, explain them in simple language, and generate clear incident reports for schools.
+> **"Making cybersecurity accessible for every school"**
 
 ---
 
-## 🏗️ Project Structure
-
-```
-ThreatIntellAI/
-│
-├── 📄 app/
-│   ├── 🚀 main.py                          # FastAPI application entry point
-│   ├── 📁 routers/                         # API route handlers
-│   ├── 🔧 services/                       # Business logic services
-│   ├── 🏗️ models/                         # Data models & schemas
-│   ├── ⚙️ utils/                          # Utility functions
-│   ├── 🎨 templates/                      # Frontend HTML templates
-│   ├── 🎨 static/                         # Frontend assets (CSS/JS)
-│   ├── 💾 storage/                        # Data storage
-│   └── __init__.py
-│
-├── 📋 requirements.txt                    # Python dependencies
-├── 📖 README.md                           # This file
-└── 🚫 .gitignore                         # Git ignore rules
-```
-
 ## ✨ Features
 
-### 🎯 Core MVP Features
-- **IOC Scanner** - Upload/enter IP, URL, domain, file hash → get risk analysis
-- **Log Analysis** - Manual upload of log files with pattern detection
-- **AI Threat Explanation** - Converts technical data to school-friendly language
-- **Incident Report Generator** - Auto-generates structured reports (PDF/HTML)
-- **Web Dashboard** - Browser-based interface, no installation required
+### 🔍 **Threat Detection**
+- **IOC Scanner**: IP, URL, Domain, Hash analysis
+- **Log Analysis**: Upload auth.log, IIS, Firewall, Windows Event logs
+- **Real Threat Intelligence**: VirusTotal & AbuseIPDB integration
+- **Pattern Detection**: Brute force, unknown users, port scans, failed logins
 
-### 🔍 Threat Detection
-- **Risk Classification**: Safe / Suspicious / Malicious
-- **Threat Labels**: Malware, Phishing, C2, Botnet, Scam
-- **Log Types**: auth.log, IIS, Firewall, Windows Event, Apache
-- **Pattern Detection**: Failed logins, brute force, unknown users, port scans
+### 🎓 **School-Focused**
+- **AI Explanations**: Technical → School-friendly language conversion
+- **Risk Classification**: Safe / Suspicious / Malicious with confidence scores
+- **Actionable Recommendations**: Practical steps for school staff
+- **No Technical Knowledge Required**: Designed for teachers and admin
 
-### 📊 Professional Reporting
-- **PDF & HTML Reports** with school branding
-- **Executive summaries** and actionable recommendations
-- **School-friendly language** for all audiences
-- **Downloadable formats** for documentation
+### 📊 **Professional Reporting**
+- **PDF & HTML Reports**: Professional incident documentation
+- **School Branding**: Customizable templates
+- **Executive Summaries**: Clear risk overviews
+- **Downloadable Formats**: Easy sharing and documentation
+
+### 🌐 **Web Dashboard**
+- **Browser-Based**: No installation required
+- **Responsive Design**: Works on computers, tablets, phones
+- **Intuitive Interface**: Easy for all school staff to use
+- **Real-time Results**: Immediate threat analysis
 
 ---
 
@@ -73,202 +57,244 @@ ThreatIntellAI/
 
 ### Installation & Running
 
-1. **Clone the repository**
+1. **Download & Setup**
    ```bash
-   git clone https://github.com/your-username/ThreatIntellAI.git
+   # Navigate to project directory
    cd ThreatIntellAI
-   ```
-
-2. **Install dependencies**
-   ```bash
+   
+   # Install dependencies
    pip install -r requirements.txt
-   ```
-
-3. **Run the application**
-   ```bash
+   
+   # Run the application
    python -m app.main
    ```
 
-4. **Access the platform**
-   - **Web Dashboard**: http://localhost:8080
-   - **API Documentation**: http://localhost:8080/docs
-   - **Health Check**: http://localhost:8080/health
+2. **Access the Platform**
+   - 🌐 **Web Dashboard**: http://localhost:8080
+   - 📚 **API Documentation**: http://localhost:8080/docs
+   - ❤️ **Health Check**: http://localhost:8080/health
 
-### For Development
-```bash
-# Run with auto-reload for development
-python -m app.main
+### Optional: Real Threat Intelligence
+Add API keys to `.env` file for real threat data:
+```env
+VIRUSTOTAL_API_KEY=your_key_here
+ABUSEIPDB_API_KEY=your_key_here
 ```
 
 ---
 
-## 📚 API Documentation
+## 🏗️ Architecture
+
+### Backend Stack
+- **FastAPI** - Modern Python web framework
+- **Uvicorn** - ASGI server for production
+- **Pydantic** - Data validation & serialization
+- **ReportLab** - Professional PDF generation
+
+### Threat Intelligence
+- **VirusTotal API** - Real-time threat intelligence
+- **AbuseIPDB API** - IP reputation analysis  
+- **Hybrid System** - Falls back to mock data if APIs unavailable
+- **Rate Limiting** - Respects API usage limits
+
+### Frontend
+- **Jinja2 Templates** - Server-side rendering
+- **Bootstrap 5** - Responsive UI framework
+- **Vanilla JavaScript** - Lightweight interactivity
+- **Custom CSS** - School-appropriate styling
+
+---
+
+## 📚 API Endpoints
 
 ### Core Endpoints
-
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/v1/ioc/scan` | Scan IOC (IP, URL, Domain, Hash) |
-| `POST` | `/api/v1/logs/upload` | Upload and analyze log files |
-| `POST` | `/api/v1/ai/explain` | AI-powered threat analysis |
+| `POST` | `/api/v1/ioc/scan` | Scan IOC (IP/URL/Domain/Hash) |
+| `POST` | `/api/v1/logs/upload` | Upload & analyze log files |
+| `POST` | `/api/v1/ai/explain` | AI threat analysis |
 | `POST` | `/api/v1/report/generate` | Generate PDF/HTML reports |
-| `GET` | `/api/v1/ioc/scan-history` | Get scan history |
+| `GET` | `/api/v1/ioc/scan-history` | View scan history |
 
-### Example API Usage
-
-**Scan an IP Address:**
-```bash
-curl -X POST "http://localhost:8080/api/v1/ioc/scan" \
-  -H "Content-Type: application/json" \
-  -d '{"value": "192.168.1.100", "type": "ip"}'
-```
-
-**Generate a Report:**
-```bash
-curl -X POST "http://localhost:8080/api/v1/report/generate" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "report_type": "incident",
-    "format": "pdf",
-    "title": "Security Incident Report",
-    "school_info": {
-      "school_name": "Springfield Elementary"
-    }
-  }'
-```
-
----
-
-## 🎨 Frontend Pages
-
-- **Dashboard** (`/`) - Main landing with quick actions
-- **IOC Scanner** (`/upload/ioc`) - Threat indicator scanning
-- **Log Analysis** (`/upload/logs`) - Security log upload & analysis
-- **Results** (`/results`) - Analysis results display
-- **History** (`/history`) - Scan history and previous results
-- **Reports** (`/reports`) - Professional report generation
+### Frontend Routes
+| Page | Route | Description |
+|------|-------|-------------|
+| 🏠 Dashboard | `/` | Main dashboard with quick actions |
+| 🔍 IOC Scanner | `/upload/ioc` | Threat indicator scanning |
+| 📁 Log Analysis | `/upload/logs` | Security log upload & analysis |
+| 📊 Results | `/results` | Analysis results display |
+| 📜 History | `/history` | Scan history and previous results |
+| 📄 Reports | `/reports` | Professional report generation |
 
 ---
 
 ## 🏫 School Use Cases
 
 ### For Teachers & Staff
-- **Check suspicious links/emails** before clicking
-- **Understand security risks** in simple language
-- **Generate incident reports** for documentation
-- **No technical knowledge required**
+- **Check suspicious links** before clicking
+- **Understand security alerts** in simple language  
+- **Document incidents** for IT follow-up
+- **Learn cybersecurity** through practical use
 
 ### For IT Teams
-- **Professional threat analysis**
-- **Log pattern detection**
-- **Incident documentation**
-- **Compliance-ready reporting**
+- **Quick threat assessment** without deep analysis
+- **Professional documentation** for incidents
+- **Log analysis** for security monitoring
+- **Training tool** for staff awareness
 
 ### For Administration
-- **Security awareness tool**
-- **Incident tracking**
-- **Training and education resource**
-- **Budget justification evidence**
+- **Security compliance** documentation
+- **Incident reporting** standardization
+- **Budget justification** for security needs
+- **Staff training** and awareness programs
 
 ---
 
-## 🔧 Technical Details
+## 🔧 Technical Features
 
-### Built With
-- **Backend**: FastAPI, Python 3.8+
-- **Frontend**: HTML5, CSS3, JavaScript, Jinja2 Templates
-- **PDF Generation**: ReportLab
-- **Storage**: JSON files (no database required)
-- **Deployment**: Local or cloud-ready
+### Security
+- ✅ Input validation and sanitization
+- ✅ File type verification for uploads
+- ✅ No external dependencies required
+- ✅ Local data storage only
 
-### Architecture
-- **Modular Design** - Easy to maintain and extend
-- **RESTful API** - Clean, documented endpoints
-- **Mock Threat Intelligence** - No external API dependencies
-- **School-Friendly** - No sensitive data or complex setup
+### Performance
+- ⚡ Async/await for non-blocking operations
+- ⚡ Automatic API fallback systems
+- ⚡ Efficient memory usage
+- ⚡ Fast response times
 
-### Security Features
-- **Input validation** and error handling
-- **File type verification** for uploads
-- **No external dependencies** for threat data
-- **Local storage** - Data stays within school control
-
----
-
-## 👥 Team Development
-
-### Current Team
-- **Syed** - Backend Architecture & API Development
-- **Sriraam** - AI Engine & Threat Intelligence
-- **Frontend Team** - UI/UX & User Interface
-
-### Development Status
-- **✅ Backend**: 100% Complete
-- **✅ Core Features**: 100% Complete
-- **🔄 Frontend**: Foundation Complete - Ready for Polish
-- **🚀 Deployment**: Ready for School Pilots
+### Scalability
+- 🏗️ Modular architecture
+- 🏗️ Easy to extend with new features
+- 🏗️ Database-ready structure
+- 🏗️ Cloud deployment prepared
 
 ---
 
-## 🌟 MVP Achievement
+## 🎯 MVP Achievement
 
-**ThreatIntellAI MVP successfully delivers:**
-> A school-friendly cyber threat detection & reporting tool that helps teachers, admin staff, and IT teams identify threats, understand risks, and respond — without needing technical knowledge.
+### ✅ **Complete & Working**
+- **Threat Detection Engine** - IOC scanning & log analysis
+- **AI Explanation System** - School-friendly threat explanations  
+- **Professional Reporting** - PDF/HTML incident reports
+- **Web Dashboard** - Browser-based interface
+- **Real API Integration** - VirusTotal & AbuseIPDB
 
-### What's Working Now
-- ✅ Threat detection via IOC scanning
-- ✅ Log analysis with pattern detection
-- ✅ AI-powered school-friendly explanations
-- ✅ Professional report generation
-- ✅ Web-based dashboard interface
-- ✅ No technical knowledge required
-
-### Ready For
-- 🏫 School pilot programs
-- 👩‍🏫 Teacher training sessions
-- 🛡️ IT team integration
-- 📊 Further development and enhancement
+### ✅ **School-Ready**
+- **No Technical Knowledge Required** - Teachers can use it immediately
+- **Clear Risk Communication** - Simple Safe/Suspicious/Malicious ratings
+- **Actionable Recommendations** - Practical steps for school staff
+- **Professional Documentation** - Ready for compliance and reporting
 
 ---
 
-## 📞 Support & Contribution
+## 🚀 Deployment
 
-### For School IT Teams
-- Deploy locally on school networks
-- Customize for specific school needs
-- Integrate with existing systems
+### Local School Network
+```bash
+# Run on school server
+python -m app.main
+
+# Access from school computers
+http://your-server:8080
+```
+
+### Development
+```bash
+# Auto-reload for development
+python -m app.main
+
+# Test different ports if needed
+python -m app.main --port 8080
+```
+
+### Production Ready
+- No external dependencies required
+- Single command deployment
+- Works on Windows, Linux, macOS
+- Minimal resource requirements
+
+---
+
+## 👥 Development Team
+
+### Roles & Contributions
+- **Syed** - Backend Architecture, API Development, System Integration
+- **Sriraam** - AI Engine, Threat Intelligence, Risk Classification
+
+### Development Timeline
+- **Week 1-2**: Core IOC Scanner & AI Engine ✅
+- **Week 3**: Log Analysis & Enhanced AI ✅  
+- **Week 4**: Professional Report Generator ✅
+- **Week 5**: Web Dashboard & Frontend ✅
+- **Week 5+**: Real API Integration & Polish ✅
+
+---
+
+## 🌟 What Makes ThreatIntellAI Special
+
+### 🎓 **Education-First Design**
+- Language tailored for school environments
+- Learning-focused explanations
+- Age-appropriate content
+- Teacher-friendly interface
+
+### 🛡️ **Real Security Value**
+- Actual threat detection capabilities
+- Professional-grade reporting
+- Actionable security insights
+- Compliance-ready documentation
+
+### 💻 **Technical Excellence**
+- Modern tech stack
+- Clean, maintainable code
+- Scalable architecture
+- Production-ready deployment
+
+---
+
+## 📞 Support & Next Steps
+
+### Immediate Next Steps
+1. **School Pilot Programs** - Deploy to test schools
+2. **User Training** - Create teacher training materials  
+3. **Feedback Collection** - Improve based on real usage
+4. **Feature Enhancement** - Add requested school features
 
 ### For Developers
-- Modular architecture for easy extension
-- Well-documented API endpoints
-- Clean, maintainable codebase
+- Modular codebase for easy extension
+- Comprehensive API documentation
+- Clean separation of concerns
+- Well-commented source code
 
-### Getting Help
-- Check API documentation at `/docs`
-- Review code comments and structure
-- Contact development team for support
+### Getting Started
+```bash
+# 1. Clone and setup
+cd ThreatIntellAI
+pip install -r requirements.txt
 
----
+# 2. Run the application  
+python -m app.main
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🎯 Next Steps
-
-1. **Frontend Polish** - Enhance user experience and mobile responsiveness
-2. **School Pilots** - Deploy to pilot schools for feedback
-3. **Feature Enhancement** - Add real threat intelligence APIs
-4. **Scale Up** - Multi-school management and advanced features
+# 3. Access and test
+# Open http://localhost:8080
+# Try scanning a test IOC or uploading sample logs
+```
 
 ---
 
 <div align="center">
 
+## 🎉 Ready for School Deployment!
+
+**ThreatIntellAI is production-ready and can provide immediate cybersecurity value to schools.**
+
+[🏠 Dashboard](http://localhost:8080) • [📚 API Docs](http://localhost:8080/docs) • [🔍 Scan Threats](http://localhost:8080/upload/ioc)
+
 **Built with ❤️ for School Cybersecurity Education**
 
-[⬆ Back to Top](#-threatintellai---school-cybersecurity-platform)
+---
+*Making cybersecurity accessible to everyone in education* 🎓
 
 </div>
