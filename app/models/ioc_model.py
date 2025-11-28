@@ -21,8 +21,8 @@ class ThreatLabel(str, Enum):
     SCAM = "scam"
     CLEAN = "clean"
 
-# Updated to match the expected API schema
-class IOCScanRequest(BaseModel):
+# Updated to match the expected API schema - FIXED NAMES
+class ScanRequest(BaseModel):
     value: str = Field(..., description="Indicator of Compromise to scan")
     type: IOCTypes = Field(..., description="Type of IOC")
 

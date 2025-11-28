@@ -6,7 +6,7 @@ import json
 import os
 from datetime import datetime
 
-from ..models.ioc_model import IOCScanRequest, IOCTypes
+from ..models.ioc_model import ScanRequest, IOCTypes  # CHANGED: IOCScanRequest → ScanRequest
 from ..models.log_model import LogType
 from ..models.report_model import ReportRequest, ReportType, ReportFormat, SchoolInfo
 
@@ -62,8 +62,8 @@ async def scan_ioc_frontend(
         # Import the actual scan function
         from app.routers.ioc_scanner import scan_ioc
         
-        # Create scan request
-        scan_request = IOCScanRequest(value=ioc_value, type=IOCTypes(ioc_type))
+        # Create scan request - CHANGED: IOCScanRequest → ScanRequest
+        scan_request = ScanRequest(value=ioc_value, type=IOCTypes(ioc_type))
         
         # Call the scan function directly
         result = await scan_ioc(scan_request)
